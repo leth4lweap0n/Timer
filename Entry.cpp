@@ -4,7 +4,6 @@
 #include <future>
 #include <thread>
 
-
 template<typename Interval>
 class Timer {
 public:
@@ -18,7 +17,7 @@ public:
         if (expired_)
             expired_ = false;
 
-        if (!future_.valid())
+        if (!expired_)
             future_ = _STD async(_STD launch::async, [this] {
             while (!expired_) {
                 try {
@@ -60,7 +59,6 @@ private:
     _STD function<void()> event_function_;
     bool expired_;
 };
-
 
 void TimerMicrosecondsDoEvent()
 {
