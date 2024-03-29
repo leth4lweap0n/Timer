@@ -9,14 +9,17 @@ template<typename Interval>
 class Timer {
 public:
     Timer() : interval_(0), event_function_(nullptr), expired_(true) {}
-    Timer (const _STD function<void()>& event_function, unsigned int interval) : interval_(interval), event_function_(event_function), expired_(true) {}
+    Timer(const _STD function<void()>& event_function, unsigned int interval) : interval_(interval), event_function_(event_function), expired_(true) {}
 
     void Start() {
         if (!event_function_)
             throw _STD runtime_error("Event function must be set before starting the timer");
 
-        expired_ = false;
-        future_ = _STD async(_STD launch::async, [this] {
+        if (expired_)
+            expired_ = false;
+
+        if (!future_.valid())
+            future_ = _STD async(_STD launch::async, [this] {
             while (!expired_) {
                 try {
                     _STD this_thread::sleep_for(interval_);
@@ -30,8 +33,11 @@ public:
     }
 
     void Stop() {
-        expired_ = true;
-        future_.wait();
+        if (!expired_)
+            expired_ = true;
+        if (future_.valid())
+            future_.wait();
+
     }
 
     bool IsRunning() const {
