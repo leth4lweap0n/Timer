@@ -13,10 +13,17 @@ public:
 		expired_ = false;
 		interval_ = Interval(interval);
 		future_ = _STD async(_STD launch::async, [this, func]() {
-			while (!expired_) {
-				_STD this_thread::sleep_for(interval_);
-				func();
-			}
+            while (!expired_) {
+                try
+                {
+                    _STD this_thread::sleep_for(interval_);
+                    func();
+                }
+                catch (const _STD exception& e)
+                {
+                    _STD cout << e.what() << _STD endl;
+                }
+            }
 			});
 	}
 
